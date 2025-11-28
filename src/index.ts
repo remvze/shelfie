@@ -244,4 +244,14 @@ program
     renderTable(items);
   });
 
+program
+  .command('history')
+  .description('Show items that are finished')
+  .action(async () => {
+    const db = await getDb();
+    const items = db.data.items.filter(i => i.status === 'done');
+
+    renderTable(items);
+  });
+
 export { program };
