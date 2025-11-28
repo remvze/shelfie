@@ -1,0 +1,48 @@
+{
+  "name": "shelfie",
+  "version": "0.0.0",
+  "main": "index.js",
+  "bin": {
+    "shelfie": "dist/bin/shelfie.mjs"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "prepare": "husky",
+    "commit": "git-cz",
+    "release": "standard-version --no-verify",
+    "release:major": "npm run release -- --release-as major",
+    "release:minor": "npm run release -- --release-as minor",
+    "release:patch": "npm run release -- --release-as patch",
+    "build": "tsup-node",
+    "dev": "tsup-node --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@biomejs/biome": "2.0.6",
+    "@commitlint/cli": "19.8.1",
+    "@commitlint/config-conventional": "19.8.1",
+    "@tsconfig/node20": "^20.1.6",
+    "@types/node": "^24.0.10",
+    "commitizen": "4.3.1",
+    "cz-conventional-changelog": "3.3.0",
+    "husky": "9.1.7",
+    "lint-staged": "16.1.2",
+    "standard-version": "9.5.0",
+    "tsup": "8.5.0"
+  },
+  "dependencies": {
+    "chalk": "5.6.2",
+    "cli-table3": "0.6.5",
+    "commander": "14.0.0",
+    "fuse.js": "7.1.0",
+    "inquirer": "13.0.1",
+    "lowdb": "7.0.1",
+    "nanoid": "5.1.6"
+  }
+}
