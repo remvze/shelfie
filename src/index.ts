@@ -254,4 +254,99 @@ program
     renderTable(items);
   });
 
+program
+  .command('start <target>')
+  .alias('s')
+  .description('Start consuming an item')
+  .action(async target => {
+    const db = await getDb();
+    const item = findItem(db.data.items, target);
+
+    if (!item) {
+      console.log(chalk.red('Item not found.'));
+      return;
+    }
+
+    if (item.status === 'active') {
+      console.log(chalk.yellow('Item is already active.'));
+      return;
+    }
+
+    item.status = 'active';
+    item.startedAt = new Date().toISOString();
+
+    await saveDb();
+
+    console.log(chalk.green(`Started "${item.title}"`));
+  });
+
+program
+  .command('log <target> <amount> [message...]')
+  .description('Log progress on an item')
+  .action(async (target, amount, messageArr) => {
+    const db = await getDb();
+    const item = findItem(db.data.items, target);
+
+    if (!item) {
+      console.log(chalk.red('Item not found.'));
+      return;
+    }
+
+    const note = messageArr ? messageArr.join(' ') : null;
+
+    item.progress = amount;
+    item.status = 'active';
+
+    if (note) {
+      const date = new Date();
+      const timestamp = `${date.getMonth() + 1}/${date.getDate()}`;
+
+      item.notes.push(`[${timestamp}] ${note} (at ${amount})`);
+    }
+
+    await saveDb();
+
+    console.log(chalk.green(`Updated "${item.title}": ${amount}`));
+  });
+
+program
+  .command('finish <target> [rating]')
+  .alias('done')
+  .alias('f')
+  .description('Mark an item as finished')
+  .action(async (target, ratingArg) => {
+    const db = await getDb();
+    const item = findItem(db.data.items, target);
+
+    if (!item) {
+      console.log(chalk.red('Item not found.'));
+    }
+
+    let rating = ratingArg
+      ? Math.min(Math.max(parseInt(ratingArg), 0), 5)
+      : null;
+
+    if (!rating) {
+      const answer = await inquirer.prompt([
+        {
+          type: 'number',
+          name: 'rating',
+          message: 'How would you rate it? (1-5)',
+          validate: val => (val >= 1 && val <= 5 ? true : '1 to 5 please.'),
+        },
+      ]);
+
+      rating = answer.rating;
+    }
+
+    item.status = 'done';
+    item.rating = rating || undefined;
+    item.progress = '100%';
+    item.finishedAt = new Date().toISOString();
+
+    await saveDb();
+
+    console.log(chalk.green(`Finished "${item.title}"! Rated: ${rating}/5`));
+  });
+
 export { program };
