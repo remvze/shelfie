@@ -106,4 +106,61 @@ program
     renderTable(items);
   });
 
+program
+  .command('pick')
+  .alias('random')
+  .description('Randomly pick an item from your backlog')
+  .option('-t, --type <type>', 'Filter by type')
+  .option('--tag <tag>', 'Filter by tag')
+  .action(async options => {
+    const db = await getDb();
+
+    let pool = db.data.items.filter(i => i.status === 'todo');
+
+    if (options.type) {
+      pool = pool.filter(i => i.type === options.type);
+    }
+
+    if (options.tag) {
+      pool = pool.filter(i => i.tags.includes(options.tag));
+    }
+
+    if (pool.length === 0) {
+      console.log(
+        chalk.red('No items found in backlog matching your criteria.'),
+      );
+    }
+
+    const winner = pool[Math.floor(Math.random() * pool.length)];
+
+    console.log(chalk.magenta(`The Shelf has spoken!\n`));
+    console.log(`${chalk.bold.cyan(winner.title)} (${winner.type})`);
+
+    if (winner.priority > 1) {
+      console.log(chalk.yellow(`Priority: ${winner.priority}`));
+    }
+
+    if (winner.tags.length > 0) {
+      console.log(chalk.dim(`Tags: ${winner.tags.join(', ')}`));
+    }
+
+    const answer = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'start',
+        message: 'Do you want to start this now?',
+        default: true,
+      },
+    ]);
+
+    if (answer.start) {
+      winner.status = 'active';
+      winner.startedAt = new Date().toISOString();
+
+      await saveDb();
+
+      console.log(chalk.green(`▶ Started "${winner.title}"`));
+    }
+  });
+
 export { program };
