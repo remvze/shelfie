@@ -163,4 +163,63 @@ program
     }
   });
 
+program
+  .command('details <target>')
+  .alias('info')
+  .description('View full details and timeline of an item')
+  .action(async target => {
+    const db = await getDb();
+    const item = findItem(db.data.items, target);
+
+    if (!item) {
+      console.log(chalk.red('Item not found'));
+      return;
+    }
+
+    console.log(chalk.bold.underline(`\n${item.title}`));
+    console.log(`ID:       ${chalk.dim(item.id)}`);
+    console.log(`Type:     ${item.type}`);
+    console.log(`Status:   ${item.status.toUpperCase()}`);
+    console.log(`Progress: ${item.progress}`);
+
+    if (item.rating) {
+      console.log(`Rating:   ${'★'.repeat(item.rating)}`);
+    }
+
+    if (item.tags.length) {
+      console.log(`Tags:     ${chalk.blue(item.tags.join(', '))}`);
+    }
+
+    console.log(chalk.bold('\nTimeline:'));
+    console.log(
+      chalk.dim(`• Added on ${new Date(item.addedAt).toLocaleDateString()}`),
+    );
+
+    if (item.startedAt) {
+      console.log(
+        chalk.dim(
+          `• Started on ${new Date(item.startedAt).toLocaleDateString()}`,
+        ),
+      );
+    }
+
+    if (item.notes && item.notes.length > 0) {
+      item.notes.forEach(note => {
+        console.log(`  | ${chalk.white(note)}`);
+      });
+    } else {
+      console.log(chalk.dim('  (No logs recorded yet)'));
+    }
+
+    if (item.finishedAt) {
+      console.log(
+        chalk.green(
+          `• Finished on ${new Date(item.finishedAt).toLocaleDateString()}`,
+        ),
+      );
+    }
+
+    console.log('');
+  });
+
 export { program };
