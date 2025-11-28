@@ -13,7 +13,7 @@ export const renderTable = (items: ShelfItem[]) => {
       chalk.cyan('Progress'),
       chalk.cyan('Rating'),
     ],
-    colWidths: [6, 10, 30, 10, 15, 8],
+    colWidths: [6, 10, 20, 10, 15, 8],
   });
 
   if (items.length === 0) {

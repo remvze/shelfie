@@ -222,4 +222,26 @@ program
     console.log('');
   });
 
+program
+  .command('now')
+  .description('Show active items')
+  .action(async () => {
+    const db = await getDb();
+    const items = db.data.items.filter(i => i.status === 'active');
+
+    renderTable(items);
+  });
+
+program
+  .command('next')
+  .description('Show high priority todo items')
+  .action(async () => {
+    const db = await getDb();
+    const items = db.data.items
+      .filter(i => i.status === 'todo')
+      .sort((a, b) => b.priority - a.priority);
+
+    renderTable(items);
+  });
+
 export { program };
