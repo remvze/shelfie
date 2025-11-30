@@ -4,6 +4,8 @@ Shelfie is a CLI tool for tracking your media consumption. Stop opening slow web
 
 Keep your books, movies, games, and series in your terminal.
 
+![Repo View Counter](https://gitviews.com/repo/remvze/shelfie.svg)
+
 ## Installation
 
 ```bash
