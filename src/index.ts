@@ -320,6 +320,7 @@ program
 
     if (!item) {
       console.log(chalk.red('Item not found.'));
+      return;
     }
 
     let rating = ratingArg
@@ -332,7 +333,8 @@ program
           type: 'number',
           name: 'rating',
           message: 'How would you rate it? (1-5)',
-          validate: val => (val >= 1 && val <= 5 ? true : '1 to 5 please.'),
+          validate: val =>
+            val && val >= 1 && val <= 5 ? true : '1 to 5 please.',
         },
       ]);
 
@@ -347,6 +349,120 @@ program
     await saveDb();
 
     console.log(chalk.green(`Finished "${item.title}"! Rated: ${rating}/5`));
+  });
+
+program
+  .command('edit <target>')
+  .description('Edit an item metadata interactively')
+  .action(async target => {
+    const db = await getDb();
+    const item = findItem(db.data.items, target);
+
+    if (!item) {
+      console.log(chalk.red('Item not found.'));
+      return;
+    }
+
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'title',
+        message: 'Title:',
+        default: item.title,
+      },
+      {
+        type: 'select',
+        name: 'type',
+        message: 'Type:',
+        choices: ['book', 'movie', 'series', 'game', 'article'],
+        default: item.type,
+      },
+      {
+        type: 'input',
+        name: 'tags',
+        message: 'Tags (comma separated):',
+        default: item.tags.join(', '),
+      },
+    ]);
+
+    item.title = answers.title;
+    item.type = answers.type;
+    item.tags = answers.tags
+      .split(',')
+      .map((t: string) => t.trim())
+      .filter(Boolean);
+
+    await saveDb();
+
+    console.log(chalk.green(`Updated "${item.title}"`));
+  });
+
+program
+  .command('rm <target>')
+  .alias('del')
+  .description('Remove an item')
+  .option('-f, --force', 'Skip confirmation')
+  .action(async (target, options) => {
+    const db = await getDb();
+    const item = findItem(db.data.items, target);
+
+    if (!item) {
+      console.log(chalk.red('Item not found.'));
+      return;
+    }
+
+    if (!options.force) {
+      const answer = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirm',
+          message: `Are you sure you want to delete "${item.title}"?`,
+        },
+      ]);
+
+      if (!answer.confirm) return;
+    }
+
+    db.data.items = db.data.items.filter(i => i.id !== item.id);
+
+    await saveDb();
+
+    console.log(chalk.red(`Deleted "${item.title}"`));
+  });
+
+program
+  .command('stats')
+  .description('Show consumption statistics')
+  .action(async () => {
+    const db = await getDb();
+    const items = db.data.items;
+
+    const doneCount = items.filter(i => i.status === 'done').length;
+    const todoCount = items.filter(i => i.status === 'todo').length;
+    const activeCount = items.filter(i => i.status === 'active').length;
+
+    const byType = items.reduce(
+      (acc, curr) => {
+        acc[curr.type] = (acc[curr.type] || 0) + 1;
+
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    console.log(chalk.bold.underline('\nShelfie Stats\n'));
+    console.log(`Total Items:  ${chalk.bold(items.length)}`);
+    console.log(`Completed:    ${chalk.green(doneCount)}`);
+    console.log(`Active:       ${chalk.yellow(activeCount)}`);
+    console.log(`Backlog:      ${chalk.dim(todoCount)}`);
+
+    console.log(chalk.bold('\nBy Type:'));
+
+    Object.entries(byType).forEach(([type, count]) => {
+      console.log(`  ${type.padEnd(10)}: ${count}`);
+    });
+
+    console.log('');
   });
 
 export { program };
