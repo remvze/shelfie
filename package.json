@@ -20,7 +20,15 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [],
-  "author": "",
+  "author": "Maze Heart",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/remvze/shelfie.git"
+  },
+  "bugs": {
+    "url": "https://github.com/remvze/shelfie/issues"
+  },
+  "homepage": "https://github.com/remvze/shelfie#readme",
   "license": "ISC",
   "description": "",
   "devDependencies": {
