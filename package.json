@@ -1,6 +1,6 @@
 {
   "name": "shelfie",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "bin": {
     "shelfie": "dist/bin/shelfie.mjs"
