@@ -1,42 +1,43 @@
 import Table from 'cli-table3';
 import chalk from 'chalk';
 
+import { formatRating, formatStatus, printInfo } from '@/lib/ui';
 import type { ShelfItem } from './types';
 
-export const renderTable = (items: ShelfItem[]) => {
-  const table = new Table({
-    head: [
-      chalk.cyan('ID'),
-      chalk.cyan('Type'),
-      chalk.cyan('Title'),
-      chalk.cyan('Status'),
-      chalk.cyan('Progress'),
-      chalk.cyan('Rating'),
-    ],
-    colWidths: [6, 10, 20, 10, 15, 8],
-  });
-
+export const renderTable = (items: ShelfItem[], title?: string) => {
   if (items.length === 0) {
-    console.log(chalk.yellow('Shelf is empty!'));
+    printInfo('No items to show.');
     return;
   }
 
-  items.forEach(item => {
-    let statusColor = chalk.white;
+  if (title) {
+    console.log(chalk.bold.cyan(`\n${title}`));
+  }
 
-    if (item.status === 'active') statusColor = chalk.yellow;
-    if (item.status === 'done') statusColor = chalk.green;
-    if (item.status === 'dropped') statusColor = chalk.gray;
+  const table = new Table({
+    head: [
+      chalk.cyan('ID'),
+      chalk.cyan('TYPE'),
+      chalk.cyan('TITLE'),
+      chalk.cyan('STATUS'),
+      chalk.cyan('PROGRESS'),
+      chalk.cyan('RATING'),
+    ],
+    colWidths: [6, 10, 28, 12, 16, 8],
+    wordWrap: true,
+  });
 
+  for (const item of items) {
     table.push([
       chalk.dim(item.id),
       item.type,
-      item.title,
-      statusColor(item.status),
-      item.progress || '',
-      item.rating ? '★'.repeat(item.rating) : '-',
+      chalk.white(item.title),
+      formatStatus(item.status),
+      item.progress || '-',
+      formatRating(item.rating),
     ]);
-  });
+  }
 
   console.log(table.toString());
 };
+
